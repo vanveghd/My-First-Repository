@@ -1,0 +1,64 @@
+---
+output:
+  html_document: default
+---
+# **Daniel Van Veghel -- Assignment 1**
+### **GEOG 712 -- Reproducible Research Workflows**
+***
+# **Research Interests:**
+  
+>> "Adding lanes to solve traffic problems is like loosening your belt to solve obesity" 
+>> - Glen Hemistra
+  
+My primary research interests lie in the study of _sustainable and active transportation issues_ in Canadian mid-sized cities. As someone with a key interest in _urban planning_, and hailing from a mid-sized Canadian city myself, I am keen to research how an accessibility-based transportation paradigm can improve both the sustainability and equity of Canadian communities, as well as **how these systems and transportation infrastructure can be improved**.  Much of the research surrounds active transportation, and travel behaviour of bikeshare users. Having only recently started my Master's degree under Dr. Darren Scott in the Transportation Research Lab (TransLAB), my exact research focus for the duration of my studies at McMaster has not yet been finalized; however, the research avenue will likely primarily follow the study of Hamilton's BikeShare ( _SoBi_ ) data. The research predominantly leverages **GIS**, as well as statistical analysis platforms such as _R_ or _SPSS_.
+
+# **Favourites**
+  
+## Favourite Music  
+1. **Operator**, by Jim Croce
+2. **Reminiscing**, by Little River Band
+3. **Devil Woman**, by Cliff Richard
+4. **In my Life**, by the Beatles
+5. **California Dreamin'**, by the Mama's and the Papa's
+  
+## Favourite Equation
+  
+#### The Standard Normal Probability Density Function:
+
+$$y = \frac{1}{\sigma \sqrt{2 \pi}}e^{\frac{-(x - \mu)}{2 \sigma^2}}  $$
+
+## Favourite Artists
+  
+**Name** | **Achievements**
+-|-
+**Jim Croce** | Induction into _Songwriters Hall of Fame_ (1990)
+**The Guess Who** | Canadian Music Hall of Fame (1987), Canadian Walk of Fame (1987), Honorary Doctorates -- Brandon University
+**Elvis Presley** | Best selling solo-artist ever, most songs hitting Billboard Top-40, Most Gold and Platinum Albums
+**The Mamas and the Papas** | Rock and Roll Hall of Fame (1998), Vocal Group Hall of Fame (2000)
+**Glen Campbell** | 10 Grammy Awards and 10 ACM Awards, Country Music Hall of Fame Induction (2005) 
+
+
+
+## A Chunk of Code
+  
+```{r}
+
+# 2 sample t-test p-value function
+
+pvalue <- function(x1, x2, var1, var2, n1, n2){
+  t <- (x1 - x2)/sqrt((var1/n1)+(var2/n2))
+  return(2*pt(-abs(t), df=(n1+n2-2)))
+}
+
+# generate two random numbers to serve as sample means, 2 random numbers \ 
+# for variances and 2 for sample sizes
+
+means <- rnorm(2, 2, 1)
+variances <- rnorm(2, 2, 1)
+samples <- floor(rnorm(2, 20, 1))
+
+pvalue(means[1], means[2], variances[1], variances[2], samples[1], samples[2])
+
+
+```
+
