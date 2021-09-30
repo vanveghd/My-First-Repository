@@ -4,7 +4,7 @@
 Thank you for visiting my first GitHub repository!
 ### **Who am I?**
   
-I am an M.Sc. Candidate in the School of Earth, Environment and Society at [McMaster University](https://www.mcmaster.ca/). I work in the School of Earth, Environment and Society's Transportation Research Lab under Dr. Darren Scott, and conduct my research in the fields of active transportation, bikesharing and urban geography, using GIS, and Big Data. 
+I am an M.Sc. Candidate in the School of Earth, Environment and Society at [McMaster University](https://www.mcmaster.ca/). I work in the School of Earth, Environment and Society's Transportation Research Lab under Dr. Darren Scott, and conduct my research in the fields of active transportation, bikesharing, travel behaviour and urban geography, using GIS, and Big Data. 
 
 ### **What is the purpose of this repository?**
   
