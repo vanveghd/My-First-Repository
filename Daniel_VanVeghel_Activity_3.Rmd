@@ -22,12 +22,17 @@ output:
 
 ## **The Data:**
   
-I would like to work with route data obtained from Hamilton BikeShare (formerly _SoBi_). This data is collected daily from the Bikeshare cycles' GPS computers, for each trip a BikeShare user takes. The dataset is point data from each cycle's GPS, and this will be converted into actual routes taken when each cycle leaves one of the BikeShare Hubs in Hamilton. As such, this data is "pre-existing" (in the sense that it is collected automatically); however, the precise routes -- which will follow cycling network links -- will be created/manipulated after the data is collected. 
+I would like to work with route data obtained from Hamilton BikeShare (formerly _SoBi_). 
+This data is collected daily from the Bikeshare cycles' GPS computers, for each trip a BikeShare user takes. The dataset is point data from each cycle's GPS,
+and this will be converted into actual routes taken when each cycle leaves one of the BikeShare Hubs in Hamilton. As such, this data is "pre-existing" (in the sense
+that it is collected automatically); however, the precise routes -- which will follow cycling network links -- will be created/manipulated after the data is collected. 
   
 #### **Legal and Ethical Considerations:**  
 
-This data is proprietary to Hamilton BikeShare and is neither available, nor can it be distributed, publicly. As part of the licensing agreement between Hamilton BikeShare and the lab, the data must be kept in the lab at all times, and no level of the raw data or the enhanced route data, can be made available -- apart from the aggregated data statistics or information -- for the purpose of academic publication. 
-  This is partially an ethical concern, as it involves personal travel information, and thus privacy of member cyclists is a concern for both the lab, and Hamilton BikeShare itself. 
+This data is proprietary to Hamilton BikeShare and is neither available, nor can it be distributed, publicly. 
+As part of the licensing agreement between Hamilton BikeShare and the lab, the data must be kept in the lab at all times, and no level of the raw data or the enhanced route data, can be made available -- apart from the aggregated data statistics or information -- for the purpose of academic publication. 
+  This is partially an ethical concern, as it involves personal travel information, and thus privacy of member 
+ cyclists is a concern for both the lab, and Hamilton BikeShare itself. 
   
 ## **Data Management Quick Hits**
   
