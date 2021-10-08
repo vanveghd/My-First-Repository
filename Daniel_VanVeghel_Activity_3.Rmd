@@ -1,0 +1,55 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# **Initial Project Data Management Plan**
+#### GEOG 712, Fall 2021
+***
+  
+## **In this DMP:**
+* About the Data
+  - Legal and Ethical Considerations
+* Data Management Quick Hits
+  - Raw Data
+  - Backups
+  - File Formatting
+  - Naming Conventions
+  - Lab and Geospatial Community Standards
+  - Documentation Processes
+  
+
+## **The Data:**
+  
+I would like to work with route data obtained from Hamilton BikeShare (formerly _SoBi_). This data is collected daily from the Bikeshare cycles' GPS computers, for each trip a BikeShare user takes. The dataset is point data from each cycle's GPS, and this will be converted into actual routes taken when each cycle leaves one of the BikeShare Hubs in Hamilton. As such, this data is "pre-existing" (in the sense that it is collected automatically); however, the precise routes -- which will follow cycling network links -- will be created/manipulated after the data is collected. 
+  
+#### **Legal and Ethical Considerations:**  
+
+This data is proprietary to Hamilton BikeShare and is neither available, nor can it be distributed, publicly. As part of the licensing agreement between Hamilton BikeShare and the lab, the data must be kept in the lab at all times, and no level of the raw data or the enhanced route data, can be made available -- apart from the aggregated data statistics or information -- for the purpose of academic publication. 
+  This is partially an ethical concern, as it involves personal travel information, and thus privacy of member cyclists is a concern for both the lab, and Hamilton BikeShare itself. 
+  
+## **Data Management Quick Hits**
+  
+- **Keeping Raw Data Raw:** The original data received from Hamilton BikeShare is copied, and this copied data is what is converted into individual routes for aggregated study. This means that backup copies of the raw data are archived and stored for many months in the lab's secure Drives for use if something goes wrong in the data aggregation process. 
+  
+- **Backup:** All important raw data, as well as the necessary tools to run the aggregation process, are stored on secure Cloud Drives, in order to minimize the potential for unavoidable damage or loss of physical digital storage infrastructure (computers, drives, files). Much of the aggregation process is scripted via `Python`, starting from the raw data and can easily generate the route data from the raw data -- which is kept separately. 
+  
+- **File Formats:** The raw data is in the form of _.gpx_ files, which are aggregated into route shapefiles -- an important data storage format for use in a GIS. While -- because much of the data is proprietary -- it thus cannot be distributed except at the aggregated and analyzed level, the shapefile ( _.shp_ ) is an extremely robust and versatile file format for geographic information, and can be easily opened on a variety of software: including open GIS platforms like QGIS. My written work (including drafts) can be formatted in both MS Word (proprietary) and with a corresponding open and versatile _.txt_ format (which can be opened in Windows via simple software like _Notepad_). This will ensure a version with more wide-ranging formatting options is kept, as well as a more open file type. These will both be kept up to date.
+  
+- **Naming Conventions:** Much of the data naming formats involve the data collection time period. For the purpose of my personal research, version titles will follow the convention: _ProjectName_DV_Draft01_Date_. The 'DV'component of the file names can be dropped from all of them if the file names' lengths exceed 32 characters. 
+   
+- **Standards:** The unique Lab policies and standards for not known at this point (other than the confidentiality of the raw data). The general standards in the Department for naming files follows a _no space and no special character policy_. Geospatially speaking, the use of shapefiles ( _.shp_ format) or KML files as file types is standard, as they can be used in a variety of software programs, including ESRI products and open-source software (ESRI, 2003). 
+Additionally, metadata storage and presentation are extremely important (in both mapping and tabular data conventions). Examples of necessary metadata includes the spatial scale of the presented cartographic data, as well as Projection/Geographic Coordinate Systems and/or Linear Units of Measurement (ESRI, 2003; Elsevier, 2018). 
+  
+- **Documentation:**
+While unique documents exist on the lab's drives explaining data details (column naming etc.), this would not be inclusive of any additional data that will be created in my modelling processes. For this additional, aggregated, or derived data, I intend on creating a thorough descriptive README file (using either Markdown or RMarkdown and saving it as a _.txt_ file for future edits). This document will contain metadata outlining variable naming conventions used in any tables, shapefile projection and linear unit information, as well as detailed information about data processing (what steps I took, why I took them, etc.). 
+  Any unique scripts written (in either `R`, or `Python`) will include thorough commenting on each geoprocessing or data analysis step undertaken, so as to provide thorough context on what the script is doing.
+  Finally, any standards or conventions used in the treatment of data (for example, a generally-accepted cutoff value for a certain process) will be documented, and the source of the standard will be included in the README as a reference.
+  
+## References:
+  
+ESRI. (2003, January). _Spatial Data Standards and GIS interoperability: An Esri White Paper_. Retrieved October 7, 2021, from [https://www.esri.com/~/media/Files/Pdfs/library/whitepapers/pdfs/spatial-data-standards.pdf](https://www.esri.com/~/media/Files/Pdfs/library/whitepapers/pdfs/spatial-data-standards.pdf).
+  
+Journal of Transport Geography. (2018). _Author Information Pack_. Elsevier.
+
