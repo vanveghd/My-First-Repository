@@ -61,6 +61,7 @@ An analysis of this route data, leveraging detailed route observations (with man
 ### Figures
 ***
 ![Example cyclist routes image.](https://github.com/vanveghd/My-First-Repository/blob/main/CycleRoute_Example.PNG)
+
   _Figure 1: Retrieved from: Lu, Scott & Dalumpines (2018)_
   Available at: [https://doi.org/10.1016/j.jtrangeo.2018.07.012](https://doi.org/10.1016/j.jtrangeo.2018.07.012)
 
