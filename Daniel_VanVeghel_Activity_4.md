@@ -1,10 +1,3 @@
----
-date: "22/10/2021"
-output:
-  pdf_document: default
-  html_document: default
----
-
 # **GEOG 712: Data in Brief**
 ##### Daniel Van Veghel -- October 25, 2021
 ***
@@ -44,9 +37,10 @@ _BikeShare, Route Choice, Cycling, Route Characteristics_
 **Specific Subject Area** | Transportation Geography; Geographic Information Science; Active Transportation
 --|--
 **Type of Data** | The project could contain Tables, Graphs (Particularly Line, Bar and Histogram), as well as figures such as anonymized maps -- where exact location is not disclosed. All code used in the data visualization and analysis process will be made available to the public via the project's Github Repository -- to be discussed in a later section of this DiB. The data presented in this project will be the aggregated and analyzed data. Raw data will not be publicly available due to security and confidentiality agreements with Hamilton BikeShare.
+--|--
 **Data Acquisition** | Raw data was acquired via Hamilton BikeShare cycle unit GPS units, which log location points of the BikeShare units during trips between Origin and Destination Hubs, and submit them to _TransLAB_ as _.gpx_ files. However, due to confidentiality agreements with Hamilton BikeShare (which allows only aggregated, anonymized route data to be shared), the data presented is for one selected Hub Pair (origin and destination). This data was acquired via _TransLAB_'s aggregation process -- converting raw GPX files into Line Shapefiles for analysis. An example route shapefile image can be seen as Figure 1 in the _Figures_ section of this DiB.  The aggregation process is done via `Python,` and `R`.
 --|--
-**Data Formats** | Raw data is confidential as per agreements with Hamilton BikeShare. Aggregated/filtered data will be formatted as either Shapefiles or aggregated shapefiles into maps generated via `R`, with proper data acknowledgement. All charts, graphs and tables will be derived from these aggregated shapefiles, and created via `R`.  The data will not have explicit locations associated with it; instead it will be presented as all routes between a random BikeShare hub pair. 
+**Data Formats** | Raw data is confidential as per agreements with Hamilton BikeShare. Aggregated/filtered data will be formatted as either Shapefiles or aggregated shapefiles into maps generated via `R`, with proper data acknowledgement. All charts, graphs and tables will be derived from these aggregated shapefiles, and created via `R`.  The data will not have explicit locations associated with it; instead it will be presented as all routes between a random BikeShare hub pair.
 --|--
 **Data Collection** | Data collection occurs constantly via Hamilton BikeShare GPS, for every trip a BikeShare user takes in the city of Hamilton. The aggregation process generally occurs on a monthly basis, converting the trip points to shapefiles, which can allow routes to be analyzed. While the exact data variables are still yet to be determined _(and this information will be updated when more is known)_, for the purpose of this particular project, the main factors will be route lengths, characteristics (i.e. number of arterial roads along route, number of minor roads, etc.), and choice frequencies of users (for example, is the distribution of routes skewed away from the shortest route?).  The Hub pair is to be chosen if it has a sufficient sample size of routes for a particular month, as well as a significant variety of potential route choices (that is, there are many links in the cycling network between Hub A and Hub B).
 --|--
@@ -68,4 +62,6 @@ An analysis of this route data, leveraging detailed route observations (with man
 ***
 ![Example cyclist routes image.](https://github.com/vanveghd/My-First-Repository/blob/main/CycleRoute_Example.PNG)
 
+  _Figure 1: Retrieved from: Lu, Scott & Dalumpines (2018)_
+  Available at: [https://doi.org/10.1016/j.jtrangeo.2018.07.012](https://doi.org/10.1016/j.jtrangeo.2018.07.012)
 
