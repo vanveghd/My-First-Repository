@@ -1,10 +1,3 @@
----
-date: "22/10/2021"
-output:
-  pdf_document: default
-  html_document: default
----
-
 # **GEOG 712: Data in Brief**
 ##### Daniel Van Veghel -- October 25, 2021
 ***
@@ -70,8 +63,8 @@ While the exact data variables are still yet to be determined _(and this informa
 **Data Accessibility**: The raw Hamilton BikeShare data is stored in cloud drives housed at McMaster University's _TransLAB_. These drives act as the primary data repository for all Hamilton BikeShare data. They are named and labeled by their dates of acquisition, and whether they are records or the trips or the GPS points themselves.  Due to the location and therefore personal route information in the raw data, it is confidential and not publicly available. 
   
 Requests for access to some or any of the Data are to be made to the both the Lab and to Hamilton BikeShare.
-**Hamilton BikeShare Contact Info**: [Website](https://hamilton.socialbicycles.com); **Phone**: (289)-768-2453
-**TransLAB Contact Info**: _To be provided at a later date_
+  **Hamilton BikeShare Contact Info**: [Website](https://hamilton.socialbicycles.com); **Phone**: (289)-768-2453
+  **TransLAB Contact Info**: _To be provided at a later date_
   
 The code used to create descriptive statistics of the Hub-pair routes and then display maps or charts/histograms will be made publicly available -- as will all figures themselves -- using GitHub as a repository. [Click to access the link to the Github Repository](https://github.com/vanveghd/My-First-Repository)
 
