@@ -24,8 +24,9 @@
   
 ### **Author:**
 Daniel Van Veghel, _M.Sc. Candidate in the School of Earth, Environment and Society -- McMaster University_
+
   _1280 Main St. W., Hamilton, ON, L8S 4V8_
-_Email: vanveghd@mcmaster.ca_
+  _Email: vanveghd@mcmaster.ca_
   
 ### **Keywords:**
 _BikeShare, Route Choice, Cycling, Route Characteristics_
@@ -63,6 +64,7 @@ While the exact data variables are still yet to be determined _(and this informa
 **Data Accessibility**: The raw Hamilton BikeShare data is stored in cloud drives housed at McMaster University's _TransLAB_. These drives act as the primary data repository for all Hamilton BikeShare data. They are named and labeled by their dates of acquisition, and whether they are records or the trips or the GPS points themselves.  Due to the location and therefore personal route information in the raw data, it is confidential and not publicly available. 
   
 Requests for access to some or any of the Data are to be made to the both the Lab and to Hamilton BikeShare.
+
   **Hamilton BikeShare Contact Info**: [Website](https://hamilton.socialbicycles.com); **Phone**: (289)-768-2453
   **TransLAB Contact Info**: _To be provided at a later date_
   
@@ -82,5 +84,3 @@ Datasets themselves are confidential as per agreements with Hamilton BikeShare a
 
 ### Competing Interests:
 None. 
-
-
