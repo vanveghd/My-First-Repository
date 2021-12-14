@@ -1,0 +1,400 @@
+---
+# Example from https://joss.readthedocs.io/en/latest/submitting.html
+title: 'Subscribers versus Customers -- Bike Share Analysis using `bikr` R Package and Binary Logistic Regression'
+tags:
+  - Travel Behaviour
+  - Bike Share
+  - Transportation
+  - Active Transportation
+  - GIS
+authors:
+  - name: Daniel Van Veghel
+    affiliation: "1"
+affiliations:
+ - name: MSc Candidate, McMaster University
+   index: 1
+citation_author: Van Veghel
+date: 15 December, 2021
+year: 2021
+bibliography: paper.bib
+output: rticles::joss_article
+csl: apa.csl
+journal: JOSS
+---
+
+# Introduction
+
+A public Bike Share system is one that rents out bicycles in different locations across a particular region, to users for membership fees -- akin to a Transit Pass -- or via a pay-per-distance-unit system (Hosford et al., 2019).
+The first Bike Share system was known as _Witte Fietsen_ and was developed in Amsterdam in 1965 [@vanderzee_2016]. Since this time, Bike Share systems have grown greatly in popularity, and since 1994, 31 successful Bike Share programs have been started in North American urban markets alone[@shaheen2012public]. One such Bike Share program is _Bike Share Pittsburgh, Inc._, which was established in 2012 and launched its _Healthy Ride_ bike system in 2015; it has expanded to more than 100 bike share hubs since then [@pittsburghbikeshare_2021].
+With Bike Share programs Pittsburgh Bike Share growing in popularity as a sustainable, affordable, and healthy means of intra-urban transportation, an analysis of rides and ridership is important for future planning within the organizations themselves, as well as at the municipal or regional government levels.
+
+This paper leverages the `R` statistical and data-visualization programming language, to further analyze Pittsburgh Bike Share Ridership trends.
+This includes the development of a new `R` package: `bikr`, available for download publicly.
+The package includes built-in Bike Share trip data, as well as several functions capable of providing data distribution visualization and significance testing.
+Finally, a simple, Binary Logistic Regression Model is presented, using `R` functionality, to predict whether the Bike Share Trip is completed by a "Subscriber" or a "Customer", using a couple of variable inputs.
+
+In keeping with the importance of openness and accessibility -- as promoted by systems like bike share programs -- all material, data, packages and source coding for this project are included within this paper itself, or this paper provides direct links to the public data repositories housing the additional materials.
+
+# Methods
+
+#### **Data**
+
+Data for this project was a Dataframe generated initially from a CSV file available [here](https://www.kaggle.com/adamscarroll/pittsburgh-healthy-ride-bikeshare-rentals-2021-q1/metadata) [@wprdc2021].
+The Dataframe contains 10 variables (listed below) and 14,619 observations -- individual Bike Share trips for the first Quarter of 2021 (January to March).
+The data was enhanced using a publicly-available Dataframe from the [Western Pennsylvania Regional Data Centre](https://data.wprdc.org/dataset/healthyride-stations), to include Latitude and Longitude coordinates for Start and End Hubs, as well as the number of bike racks at each hub.
+The dataframe was also enriched with several additional estimated or binary variables.
+The Maximum Distance capable in trip ("Max_Dist") was estimated using the Trip Duration (converted to hours) and an average cyclist biking speed of 22 km/h.
+Finally, a binary variable was coded for trips that started and ended at the same hubs.
+
+```{r data-merging, echo=FALSE, fig.width=1.0, tidy=TRUE, tidy.opts=list(width.cutoff=50), out.width="80%", message=FALSE, warning=FALSE}
+
+library(usethis)
+library(devtools)
+library(knitr)
+library(dplyr)
+library(kableExtra)
+library(tidyr)
+
+devtools::install_github("vanveghd/bikr")
+library(bikr)
+
+tripdata <- data("bikesharedata")
+
+hubdata <- as.data.frame(
+  read.csv("https://data.wprdc.org/dataset/4451c1c7-93ad-4fb1-9e60-323da936e63f/resource/ec4ac603-ca68-46b9-8229-66983d73be29/download/healthy-ride-station-locations-2021-q1.csv"))
+
+join1 <- merge(bikesharedata, hubdata, by.x = "From.station.id", by.y = "Station..")
+
+## Rename Merged Dataset Lat and Long variables to indicate they are coordinates
+## for starting hubs
+names(join1)[names(join1) == "Latitude"] <- "Start_Lat"
+names(join1)[names(join1) == "Longitude"] <- "Start_Log"
+
+## Renamed Second Merged Dataset Lat and Long variables to indicate they are 
+## coordinates for ending hubs
+join2 <- merge(join1, hubdata, by.x = "To.station.id", by.y = "Station..")
+names(join2)[names(join2) == "Latitude"] <- "End_Lat"
+names(join2)[names(join2) == "Longitude"] <- "End_Log"
+
+join2$Max_Dist = (join2$Tripduration/3600)*22
+
+join2$Same_Dest = ifelse(join2$To.station.id == join2$From.station.id, 1, 0)
+join2$Is_Subscriber = ifelse(join2$Usertype == "Subscriber", 1, 0)
+
+```
+
+The final aggregated and pre-processed dataset contained 18 variables.
+These variables, along with their datatypes, are described in Table 1 below:
+
+```{r variables, fig.pos='H', echo=FALSE, fig.align='center', tidy=TRUE}
+vars.df <- data.frame(Name = c("trip.id", "Starttime", "Stoptime", "Bikeid", "TripDuration", "From.station.id", "To.station.id", "From.station.name", "To.station.name", "Usertype", "Number of Racks", "Start_Lat", "Start_Log", "End_Lat", "End_Log", "Max_Dist", "Same_Dest", "Is_Subscriber"),
+                      Alias = c("Trip ID", "Trip Start Time", "Trip End Time", "Bike Share Bike ID", "Length of Trip in Minutes", "Origin Hub ID", "Destination Hub ID", "Origin Hub Name", "Destination Hub Name", "Bike Share User Designation", "Number of Racks Available at Hub", "Latitude of Start Hub", "Longitude of Start Hub", "Latitude of End Hub", "Longitude of End Hub","Estimated Max Distance of Trip", "Start and End Hubs are the same", "Is a Subscriber"),
+                      Datatype = c("Nominal", "Date/Time", "Date/Time", "Nominal", "Continuous", "Nominal", "Nominal", "Nominal", "Nominal", "Nominal", "Discrete", "Continuous", "Continuous", "Continuous", "Continuous","Continuous", "Binary, Nominal", "Binary, Nominal"))
+
+kable(vars.df, 
+      booktabs = TRUE,
+      caption = "Variables and Variable Data Types") %>%
+  kableExtra::kable_styling(latex_options = c("striped", "HOLD_position"))
+
+```
+
+#### **Descriptive Statistics**
+
+```{r descriptives, echo=FALSE, out.width="80%", fig.pos='h', tidy=TRUE}
+
+desc.statsdf <- data.frame(Variable = c("Trip Duration", "# of Racks", "Max Distance", "Start Latitude", "Start Longitude", "End Latitude", "End Longitude"),
+                           Mean = c(mean(join2$Tripduration), mean(join2$X..of.Racks.x), mean(join2$Max_Dist), mean(join2$Start_Lat), mean(join2$Start_Log), mean(join2$End_Lat), mean(join2$End_Log)),
+                           Median = c(median(join2$Tripduration), median(join2$X..of.Racks.x), median(join2$Max_Dist), median(join2$Start_Lat), median(join2$Start_Log), median(join2$End_Lat), median(join2$End_Log)),
+                           StDev = c(sd(join2$Tripduration), sd(join2$X..of.Racks.x), sd(join2$Max_Dist), sd(join2$Start_Lat), sd(join2$Start_Log), sd(join2$End_Lat), sd(join2$End_Log)),
+                           Min = c(min(join2$Tripduration), min(join2$X..of.Racks.x), min(join2$Max_Dist), min(join2$Start_Lat), min(join2$Start_Log), min(join2$End_Lat), min(join2$End_Log)),
+                           Max = c(max(join2$Tripduration), max(join2$X..of.Racks.x), max(join2$Max_Dist), max(join2$Start_Lat), max(join2$Start_Log), max(join2$End_Lat), max(join2$End_Log)))
+
+kable(desc.statsdf, 
+      digits = 2, 
+      caption = "Continuous Variable Descriptive Statistics",
+      booktabs = TRUE) %>%
+  kableExtra::kable_styling(latex_options = c("striped", "HOLD_position"))
+
+```
+
+#### **'bikr' `R` Package**
+
+A simple, but complete, `R` Package was created as part of the analysis.
+It contained two functions and the dataset used in the analysis.
+The two functions are `visualize_tripdurations` and `compare_means`.
+The first function is a parameter-free function which provides several data visualization plots of the distribution of trip durations in the dataset.
+These visualizations include a histogram, a boxplot, and a barplot of average durations by user type (Subscriber, Customer or Not Indicated).
+The second function is a statistical tool which performs an independent-sample t-test calculation.
+It has several parameters: `mean1`, `mean2`, `var1`, `var2`, `n1` and `n2`, which are the first sample mean, second sample mean, first sample variance, second sample variance, first sample size and second sample size, respectively.
+
+The package and statistical function within `bikr` will be used in the subsequent analysis, as an example of a means to determine whether the population of bike share riders are heterogeneous or homogenous, which will be important to know for the subsequent Binary Logistic Regression.
+
+#### **Methods**
+
+#### Sample homogeneity
+
+Sample homogeneity is important in Multivariate Analysis, and so the data could be tested to determine if there were significant differences in Trip Durations between samples of Subscribers and Customers.
+To exemplify how to determine sample homo or heterogeneity, the `compare_means` tool from the `bikr` package was run on randomly-generated 30-case samples.
+This was done using process below. The first output value from the code is the t-value, and the second is the corresponding p-value.
+
+```{r compare-means, fig.align='center', fig.pos='H', tidy=TRUE, out.width="80%"}
+
+## Random sample (n=30) of the data
+sam <- as.data.frame(join2[sample(nrow(join2), 30), ])
+
+## Calculate means, variances and counts by User Type in the sample
+avgs <- aggregate(sam$Tripduration, by=list(sam$Usertype), FUN=mean)
+vars <- aggregate(sam$Tripduration, by=list(sam$Usertype), FUN=var)
+ns <- aggregate(sam$Tripduration, by=list(sam$Usertype), FUN=length)
+
+## Run Independent Sample t-test
+bikr::compare_means(avgs[1,2], avgs[2,2], vars[1,2], vars[2,2],
+                    ns[1,2], ns[2,2])
+
+```
+
+While this sample is very small, considering the overall size of the dataset, and a more complete and large-scale test of homogeneity is necessary, the `bikr` package provides a means of testing the data for Multivariate Assumptions and homogeneity.
+
+#### Multivariate data assumptions
+
+The multivariate data assumptions are Normality, Linearity, and Homoscedasticity [@hair2019multivariate].
+While more rigorous testing is generally needed than that provided in this paper (such as Shapiro-Wilk testing, e.g.), evaluations of these assumptions can be made visually through plots.
+While bikr offers data visualization capabilities, the complex plots offered by the `ggplot2` package are best suited for this visual analysis.
+The normality of three continuous variables have been tested: "Trip Duration", "Start Hub Latitude" and "Start Hub Longitude".
+The figures below showcase these variables' distributions.
+
+```{r distributions, fig.pos='H', out.width="80%",results='hide',message=FALSE, echo=FALSE, fig.align='center', fig.cap="Continuous Variable Distributions", tidy=TRUE, warning=FALSE, message=FALSE}
+
+library("ggplot2")
+library("patchwork")
+
+fig1 <- ggplot(data = join2, aes(x=Tripduration)) + geom_histogram(color="darkblue", 
+                                                           fill="lightblue",
+                                                           binwidth = 1000) +
+  ggtitle("Distribution of Trip Duration Variable") + xlab("Trip Duration") + 
+  ylab("Frequency") + xlim(-5, 100000) + ylim(0, 2000)
+
+fig2 <- ggplot(data = join2, aes(x=Start_Lat)) + geom_histogram(color="darkgreen", 
+                                                           fill="lightgreen", binwidth = 0.001) +
+  ggtitle("Distribution of Start Hub Latitude Variable") + xlab("Latitude") + 
+  ylab("Frequency") + xlim(c(40.4, 40.5))
+
+fig3 <- ggplot(data = join2, aes(x=Start_Log)) + geom_histogram(color="black", 
+                                                           fill="yellow", binwidth = 0.001) +
+  ggtitle("Distribution of Start Hub Longitude Variable") + xlab("Longitude") + 
+  ylab("Frequency") + xlim(c(-79.875, -80.025))
+
+fig1 / fig2 / fig3
+
+```
+
+These variables are not normally distributed.
+They are each skewed; the Trip Duration variable is heavily skewed to the right.
+This data violates the normality assumption.
+  
+Next, the variables are tested for the Multivariate Assumption of Linearity. This can be seen in the following correlation matrix.
+
+``` {r corr-matrix, fig.align='center', fig.pos='H', echo=FALSE}
+
+cont.variables <- data.frame(cbind(join2$Tripduration, join2$X..of.Racks.y, join2$Max_Dist, join2$Start_Lat, join2$Start_Log, join2$End_Lat, join2$End_Log))
+colnames(cont.variables) <- c("TripDuration", "#_Racks", "Max_Distance", "Start_Lat", "Start_Long", "End_Lat", "End_Long")
+corr.df <- data.frame(round(cor(cont.variables), 3))
+
+kable(corr.df, digits = 2, 
+      caption = "Correlation Matrix for Continuous Variables",
+      booktabs = TRUE) %>%
+  kable_styling(latex_options = c("striped", "HOLD_position", "scale_down"))
+
+
+```
+Several variables exhibit high correlations, including Trip Duration and Max Distance ( _1.00_ ), as well as Starting Longitude and Ending Longitude ( _0.82_ ).
+
+#### Binary Logistic Regression
+
+A Binary Logistic Regression is a multivariate statistical data model, which uses a variety of categorical or numerical variables as independent variables, to predict the probability or odds of the occurrence of an event (Hair et al., 2019).
+The dependent variable in the model is a binary variable, where 1 indicates the occurrence of an event, or the presence of a quality, and 0 indicates the absence of the event or quality.
+While the data was well-suited for this model type, the Binary Logistic Regression method was also used because the continuous variables, as shown in the *Data* section of the paper, did not meet the multivariate data assumptions of Normality, Linearity, and Homoscedasticity.
+Binary Logistic Regression does not require treatment to meet these assumptions, and so it was the optimal analysis technique for the data.
+
+The standard multiple linear regression follows the format:
+
+$$
+y = \beta_0 +\beta_1x_1 + \beta_2x_2+...+\beta_nx_n + \epsilon
+$$ 
+
+Where $y$ is a metric dependent variable, $\beta_0$ is the intercept of the multivariate plane-of-best-fit, $\beta_n$ is the regression coefficient for $x_n$, an individual independent variable, and epsilon is representative of the model error.
+
+The Binary Logistic Regression equation, however, is defined as:
+
+$$
+P(Y) = \frac{e^{\alpha + \beta X}}{1 + e^{\alpha + \beta X}}
+$$
+  Where $P(Y)$ is the probability of the occurrence of event $Y$, $\alpha$ is the y-intercept, $\beta$ are the variable coefficients and $X$ is an independent variable.
+
+The generalized function follows an S-Curve of the form:
+
+```{r s-curve, echo=FALSE, fig.cap="Basic Logit Function", out.width="80%", fig.align='center', fig.pos='H'}
+
+eq <- function(x, y){return((exp(x))/(1+exp(x)))}
+ggplot2::ggplot(data.frame(x=c(-10, 10)), aes(x=x)) + 
+  stat_function(fun = eq, color="red", lwd=1) + 
+  ggtitle("Standard Logit Function, with intercept 0 and beta = 1")
+
+```
+
+Three potential variables are to be considered in the analysis: "Trip Duration", "Max Distance" and "Same Destination".
+First, correlations between variables must be checked.
+Any variable pairing with a correlation greater than 0.7 (particularly those approaching perfect correlation) must be addressed (Hair et al., 2019).
+The variable pair's correlation can be inspected visually:
+
+```{r correlation, echo=FALSE, fig.align='center', out.width="80%", fig.cap="Trip Duration and Max Distance", fig.pos="H", warning=FALSE, message=FALSE}
+
+ggplot2::ggplot(data = join2, aes(x = Tripduration, y = Max_Dist)) +
+  geom_point() + ggtitle("Trip Duration and Max Distance Correlation") + 
+  xlab("Trip Duration (min)") + ylab("Max Distance (km)")
+
+```
+
+These variables exhibit singularity -- a perfect correlation.
+This intuitively makes sense; the "Max Distance" variable was generated by applying multiplication and division to the "Trip Duration" variable.
+Therefore, because the one is perfectly scaled with the other, it is perfectly positively correlated.
+The Max Distance variable was removed from the analysis, and the measured variable was used instead.
+
+# Results
+
+#### The Model
+
+The model was generated using the `glm` function in `R`.
+
+```{r logit, echo=FALSE, fig.width=1.0, out.width="80%", fig.pos='H', warning=FALSE, message=FALSE}
+
+library(broom)
+join2$Same_Dest <- factor(join2$Same_Dest)
+logit <- glm(join2$Is_Subscriber ~ join2$Tripduration + join2$Same_Dest, 
+             family = "binomial")
+logit_table <- broom::tidy(logit)
+logit_table$term[logit_table$term == "(Intercept)"] <- "Intercept (B0)"
+logit_table$term[logit_table$term == "join2$Tripduration"] <- "Trip Duration"
+logit_table$term[logit_table$term == "join2$Same_Dest1"] <- "Same Destination as Origin"
+
+kable(logit_table, digits = 3,
+        caption = "Logistic Regression Results", booktabs = TRUE,
+      col.names = c("Predictor", "B", "Std. Error", "t-Statistic", "p-Value")) %>%
+  kable_styling(latex_options = c("striped", "HOLD_position")) %>%
+  column_spec(1, bold = TRUE) %>%
+  footnote(general = "p-values of '0' could be a result of large sample size, and therefore large degree of freedom")
+
+
+```
+
+A simple 'goodness of fit' parameter can be calculated for the estimated model using the formula:
+
+$$
+R^2 = 1 - (\frac{R_d}{N_d})
+$$ 
+
+Where $R_d$ is the Residual Deviance, and $N_d$ is the Null Deviance.
+This produces an $R^2$ of 0.244.
+The final Logit Model is written as:
+
+$$
+Logit_i = 1.172 - 0.00065t_t - 1.058s_d
+$$ 
+
+Where $t_t$ is the Travel Duration, and $s_d$ is the binary "Same Destination" variable.
+As the continuous variable increases, there is a decrease in the log(odds) of the individual taking this trip being a subscriber.
+Subsequently, having the destination the same as the origin for the trip presents a significant decrease in the log(odds) of a Subscriber taking the trip, with respect to a trip with different start and end hubs.
+
+#### Model Accuracy
+
+The Figures below indicate the proportions of actual occurrences of all observations predicted as "Subscribers" by the model:
+
+```{r prediction-accuracy, fig.align='center',fig.pos='H',fig.cap="Actual Make-Up of Predicted Subscriber Trips",out.width="80%"}
+
+## New Same_Dest variable that is not a 'factor'
+join2$Same_Dest_2 <- ifelse(join2$To.station.id == join2$From.station.id, 1, 0)
+join2$Prob <- (exp(1.172 - 0.00065*join2$Tripduration) - 
+                 1.058*(join2$Same_Dest_2))/
+  (1 + (exp(1.172 - 0.00065*join2$Tripduration) - 1.058*(join2$Same_Dest_2)))
+
+join2$Prediction <- ifelse(join2$Prob > 0.50, 1, 0)
+
+
+ggplot(join2, aes(x="", y=Prediction, fill=Usertype))+
+geom_bar(width = 1, stat = "identity") + xlab(" ")
+
+```
+
+The Model was validated through the manual generation of a confusion matrix.
+This prevented the need for further package installation.
+
+```{r confusion-matrix, echo=FALSE, out.width="80%", fig.pos='H', fig.align='center'}
+
+join2$TruePos <- ifelse((join2$Prediction == 1 & join2$Is_Subscriber == 1), 1,
+                        0)
+join2$FalsePos <- ifelse((join2$Prediction == 1 & join2$Is_Subscriber == 0), 1,
+                         0)
+join2$TrueNeg <- ifelse((join2$Prediction == 0 & join2$Is_Subscriber == 0), 1,
+                        0)
+join2$FalseNeg <- ifelse((join2$Prediction == 0 & join2$Is_Subscriber == 1), 1,
+                         0)
+
+Pred_Positives <- c("1", sum(join2$TruePos), sum(join2$FalsePos))
+Pred_Negatives <- c("0", sum(join2$TrueNeg), sum(join2$FalseNeg))
+
+
+confusion_matrix <- as.data.frame(rbind(Pred_Positives, Pred_Negatives))
+names(confusion_matrix) <- c(" ", "1", "0")
+confusion_matrix[confusion_matrix$` ` == "Pred_Positives"] <- "Positive"
+confusion_matrix[confusion_matrix$` ` == "Pred_Negatives"] <- "Negative"
+
+kable(confusion_matrix, booktabs = TRUE, digits = 1,
+      caption = "Model Predictive Accuracy Confusion Matrix") %>%
+  kable_styling(latex_options = c("striped", "HOLD_position", "scale_down"), full_width=F, font_size=10) %>%
+  add_header_above(c(" " = 1, " " = 1, "Actual Occurrence" = 2)) %>%
+  pack_rows("Predicted Value", 1, 2)
+```
+
+This model produces a Sensitivity ($\frac{TP}{TP + FP}$) of **0.623** and a Recall ($\frac{TP}{TP + FN}$) of **0.553**.
+These values are quite low for model prediction accuracy.
+
+# Discussion
+
+While this model would be unacceptable to present as a potential means of predicting User Types accurately, it is successful in applying statistical techniques to the dataset presented.
+However, there is merit to the model produced and its associated coefficients.
+To begin, the $\beta_0$ intercept value is 1.172.
+As the intercept, is no other values for other independent variables were present, this would mean the Logit value was 1.172.
+We convert Logits to Probabilities of Event Occurrence via:
+
+$$
+P(Y) = \frac{e^{Logit_i}}{1 + e^{Logit_i}}
+$$ 
+
+This means that if the Trip Duration was 0 seconds (i.e. no trip) and therefore the destination variable was removed as well, the probability of the user being a subscriber would be $\frac{e^{1.172}}{1 + e^{1.172}}$ or 76.3%.
+Additionally, Trip Durations is seen as having a near-zero impact on the probability of event occurrence.
+This makes sense based on _Healthy Rides Pittsburgh_ payment plans.
+The company's payments include 2 dollars for 30 minutes, or membership rates of 12 or 20 dollars/month for unlimited trips between 30 and 60 minutes [@pittsburghbikeshare_2021]. This means that, because all trips are based on time, for the average person who is not regularly using bike share systems for longer trips, there is less benefit to being a member; if the trip length is beyond the 30 or 60 minute length, they would pay more -- regardless of their subscriber status. This means, Trip Durations have very little impact on probability of subscriber status. The Same Destination variable, however, has a strong negative impact on the probability of Subscriber status. One could assume that subscribers are more regular users of the bike share system. Several studies have been conducted, via surveys and trip data, to determine the most prominent demographics of regular bike share users. Fishman et al., [-@Fishman_2015], in a comprehensive review of bike share literature, found that "Commuting is the most common trip purpose for annual members" of bike share systems -- citing work by Buck et al. [-@buck2013].
+As commuting is intuitively a trip from Point A to B (i.e. with a different start and end point), the model confirms the findings of other studies in the literature.
+Trips with the same origin and destination hubs are much less likely to be from a Subscriber than those with different start and end points.
+  
+  Finally, the `bikr` package, though in its early development stages, presents an intriguing path toward more complex, publicly-available analysis toolkits for active transportation researchers.
+The ability for data analysis packages to be publicly accessed is important for promoting more widespread study of topics like bike share.
+While the package only has a single dataset, and two simple functions, it is a starting point for deeper and more meaningful analytical tools, as well as a wider range of datasets to explore.
+  
+  This paper is subject to several distinct limitations.
+To begin, the dataset is limited in variables provided, and so several variables were derived via estimations.
+Analysis of a dataset with more environmental variables, such as weather or temperature, as well as more locational data would be beneficial for further exploration.
+More variables included in the Binary Logistic Regression could have also potentially produced a more accurate, well-fitting model than that which the study proposes.
+Additionally, more efficient, and stronger analyses could have been conducted with additional statistical packages; however, the study attempted to accomplish a general data analysis manually -- using either `base R` functions or tools created in the `bikr` package.
+Finally, the study is limited in its scope -- having focused only on the city of Pittsburgh and on one bike share system.
+Further work should be done on a larger geographic and organizational scope, to better understand bike share influences and trip patterns.
+
+Conclusion
+=================
+
+This study presents a rudimentary data analysis and basic Logistic Regression Model, on a sample bike share trip dataset for *Healthy Rides Pittsburgh* bike share system.
+It created a novel bike share trip analysis `R` package called `bikr`, and performed some basic modelling. It found that the length of the trip (in minutes) and whether the trip had the same start and end hubs influenced the probability of users being Subscribers to the _Healthy Rides_ system. 
+Finally, the paper kept with the principles of openness and accessibility -- promoted by public-use systems like bike share -- and contains all necessary code, data or links to data, in order for the work to be reproduced or enhanced by other researchers. 
+
+References {#references .unnumbered}
+==========
